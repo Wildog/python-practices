@@ -16,13 +16,11 @@ def download_image(url):
     with open(filename, 'wb') as f:
         file_size = int(page.info().getheaders('Content-Length')[0])
         print 'Downloading: %s, %s' % (filename, file_size)
-        downloaded = 0
         buffer_size = 8192
         while True:
             buffer = page.read(buffer_size)
             if not buffer:
                 break
-            downloaded += len(buffer)
             f.write(buffer)
 
 if __name__ == '__main__':
