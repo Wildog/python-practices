@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="stylesheet" href="{{url_for('static', filename='assets/bootstrap.min.css')}}" type="text/css" media="all" />
+        <title>Message Board</title>
+        <style type="text/css">
+            #header {height: 80px; padding: 10px 0 0 20px; background-color: #2D3E4F; color: white;font-family: "Arial"; font-weight: bold; font-size: 40px}
+            #msg-panel {margin: 20px 0 0 0}
+            .input-group {margin: 5px 0}
+            .input-group-addon {min-width: 100px}
+            #msg-text-area {height: 100px; vertical-align: top}
+            #msg-addon {vertical-align: top; padding: 10px 0}
+        </style>
+    </head>
+    <body>
+        <div id="header">Message Board</div>
+        <div class="container-fluid">
+            <div class="panel panel-default" id="msg-panel">
+                <div class="panel-heading">Leave a message here</div>
+                <div class="panel-body">
+                    <form id="new-msg"  action="submit" method="post">
+                        <div class="input-group">
+                            <span class="input-group-addon">Name</span>
+                            <input class="form-control" type="text" name="name">
+                        </div>
+                        <div class="input-group" id="msg-group">
+                            <span class="input-group-addon" id="msg-addon">Message</span>
+                            <textarea class="form-control" id="msg-text-area" type="text" name="msg"></textarea>
+                        </div>
+                        <button class="btn btn-primary btn-block" id="submit-button">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <h3>Message History <span class="badge">{{msg_count}}</span></h3>
+            <div class="list-group well">
+                {% for msg in msgs %}
+                <div class="list-group-item">
+                    <h5 class="list-group-item-heading">{{msg.name}} at {{msg.time}}</h4>
+                    <p class="list-group-item-text">{{msg.msg}}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </body>
+</html>
