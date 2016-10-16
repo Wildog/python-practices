@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="stylesheet" href="{{url_for('static', filename='assets/bootstrap.min.css')}}" type="text/css" media="all" />
+        <script src="{{url_for('static', filename='assets/jquery-3.1.1.min.js')}}" type="text/javascript" charset="utf-8"></script>
+        <script src="{{url_for('static', filename='assets/bootstrap.min.js')}}" type="text/javascript" charset="utf-8"></script>
+        <title>Message Board</title>
+        <style type="text/css">
+            #header {height: 80px; padding: 10px 0 0 10px; background-color: #2D3E4F; color: white;font-family: "Arial"; font-weight: bold; font-size: 40px}
+            .input-group {margin: 5px 0}
+            .input-group-addon {min-width: 90px}
+            .login-container {float: none; margin: 20px auto}
+        </style>
+    </head>
+    <body>
+        <div id="header">
+            Todo-List
+        </div>
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-success alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>{{ message }}</strong>
+        </div>
+        {% endfor %}
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-3 login-container">
+                    <div class="panel panel-default" id="login-panel">
+                        <div class="panel-heading">Login</div>
+                        <div class="panel-body">
+                            <form id="login"  action="login" method="post">
+                                <div class="input-group">
+                                    <span class="input-group-addon">Username</span>
+                                    <input class="form-control" type="text" name="username">
+                                </div>
+                                <div class="input-group" id="login-group">
+                                    <span class="input-group-addon">Password</span>
+                                    <input class="form-control" type="password" name="password">
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-6" style="padding-right: 3px">
+                                        <button class="btn btn-primary btn-block" id="login-button">Login</button>
+                                    </div>
+                                    <div class="col-xs-6" style="padding-left: 3px">
+                                        <button class="btn btn-success btn-block" id="register-button" formaction="register">Register</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

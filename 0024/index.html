@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="stylesheet" href="{{url_for('static', filename='assets/bootstrap.min.css')}}" type="text/css" media="all" />
+        <link rel="stylesheet" href="{{url_for('static', filename='assets/bootstrap-datetimepicker.min.css')}}" type="text/css" media="all" />
+        <script src="{{url_for('static', filename='assets/jquery-3.1.1.min.js')}}" type="text/javascript" charset="utf-8"></script>
+        <script src="{{url_for('static', filename='assets/moment.min.js')}}" type="text/javascript" charset="utf-8"></script>
+        <script src="{{url_for('static', filename='assets/bootstrap.min.js')}}" type="text/javascript" charset="utf-8"></script>
+        <script src="{{url_for('static', filename='assets/bootstrap-datetimepicker.min.js')}}" type="text/javascript" charset="utf-8"></script>
+        <title>Message Board</title>
+        <style type="text/css">
+            #header {padding: 10px 0 10px 10px; background-color: #2D3E4F; color: white;font-family: "Arial"; font-weight: bold; font-size: 36px}
+            .user {padding: 10px 15px 0 10px}
+            #task-panel {margin: 20px 0 0 0}
+            .input-group {margin: 5px 0}
+            .input-group-addon {min-width: 100px}
+            #task-text-area {height: 100px; vertical-align: top}
+            #task-addon {vertical-align: top; padding: 10px 0}
+            .toolbar {margin: 10px 0 0 0}
+            #table-title {margin-top: 0; margin-bottom: 15px}
+            .item-action {width: 150px}
+            .item-due {width: 150px}
+            .time {font-size: 12px}
+            #sort-dropdown {display: inline}
+            .pagination {margin: 0}
+        </style>
+    </head>
+    <body>
+        <div id="header">
+            Todo-List
+            <div class="btn-group pull-right user">
+                <button class="btn btn-default"><span class="glyphicon glyphicon-user" style="margin-right: 5px"></span>{{ username }}</button>
+                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-success alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>{{ message }}</strong>
+        </div>
+        {% endfor %}
+        <div class="container-fluid">
+            <div class="pull-right toolbar">
+                <form class="form-inline" action="/" method="get">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-addon">By Title</div>
+                            <input type="text" class="form-control" id="search-input" name="search">
+                            <div class="input-group-btn">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </div>
+                        </div>
+                        <div id="sort-dropdown" class="dropdown">
+                            <button class="btn btn-default" type="button" data-toggle="dropdown">
+                                Sort
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu pull-right">
+                                <li>
+                                    <a href="{{ url_for('index', order='title', search=search) }}">Title</a>
+                                    <a href="{{ url_for('index', order='due', search=search) }}">Due Time</a>
+                                    <a href="{{ url_for('index', order='created', search=search) }}">Create Time</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <h3 id="table-title">{% if search %}Result for '{{ search }}'{% else %}All tasks{% endif %} <span class="badge">{{ count }}</span>{% if search %}<span><a class="btn btn-default" href="{{ url_for('index') }}" style="margin-left: 5px; max-height: 30px">End Search</a></span>{% endif %}</h3>
+            <div class="panel panel-default">
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th class='hidden-xs'>Due</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td><a href="javascript:void(0)" data-toggle="modal" data-target="#{{ item.itemid }}">{{ item.title }}</a></td>
+                            <td class='item-due hidden-xs'>{{ item.due | date_fmt }}</td>
+                            <td class='item-action'><a href="delete?id={{ item.itemid }}">Delete</a></td>
+                            <!-- Modal -->
+                            <div id="{{ item.itemid }}" class="modal fade" role="dialog">
+                                <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">{{ item.title }}</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <h5>{{ item.description }}</h5>
+                                            <br>
+                                            <p class="time">Created:<br>{{ item.created | date_fmt }}</p>
+                                            <p class="time">Due:<br>{{ item.due | date_fmt }}</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <nav>
+                <ul class="pagination">
+                    <li{% if not pagination.has_prev %} class="disabled"{% endif %}>
+                        <a href="{% if pagination.has_prev %}{{ url_for('index', page=pagination.page - 1, search=search) }}{% else %}#{% endif %}">
+                            <span>&laquo;</span>
+                        </a>
+                    </li>
+                    {% for p in pagination.iter_pages() %}
+                        {% if p %}
+                            {% if p == pagination.page %}
+                            <li class="active"><a href="{{ url_for('index', page=p, search=search) }}">{{ p }}</a></li>
+                            {% else %}
+                            <li><a href="{{ url_for('index', page=p, search=search) }}">{{ p }}</a></li>
+                            {% endif %}
+                        {% else %}
+                        <li class="disabled"><a href="#">&hellip;</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li{% if not pagination.has_next %} class="disabled"{% endif %}>
+                        <a href="{% if pagination.has_next %}{{ url_for('index', page=pagination.page + 1, search=search) }}{% else %}#{% endif %}">
+                            <span>&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="container-fluid">
+            <div class="panel panel-default" id="task-panel">
+                <div class="panel-heading">Create a task here</div>
+                <div class="panel-body">
+                    <form id="new-task"  action="newtask" method="post">
+                        <div class="input-group">
+                            <span class="input-group-addon">Title</span>
+                            <input class="form-control" type="text" name="title">
+                        </div>
+                        <div class="input-group" id="task-group">
+                            <span class="input-group-addon" id="task-addon">Description</span>
+                            <textarea class="form-control" id="task-text-area" type="text" name="description"></textarea>
+                        </div>
+                        <div class='input-group date' id='datetimepicker'>
+                            <span class="input-group-addon">Due</span>
+                            <input type='text' class="form-control" name="due">
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                        <script type="text/javascript">
+                            $(function () {
+                                $('#datetimepicker').datetimepicker({
+                                    sideBySide: true,
+                                    defaultDate: new Date()
+                                });
+                            });
+                        </script>
+                        <button class="btn btn-primary btn-block" id="submit-button">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
