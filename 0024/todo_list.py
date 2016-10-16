@@ -15,13 +15,14 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, static_path='/static', template_folder=basedir)
 app.secret_key = u'\x12\x96\x1a\x0e+\xbd\xb4\x1b\x02\xd6G\xe2\xeb\x8f\xf3\xf8f);Us\x05\x84_'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'todolist.sqlit')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'todolist.sqlite')
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 db = SQLAlchemy(app)
 
 login_manager = LoginManager()
 login_manager.session_protection = 'basic'
 login_manager.login_view = 'login'
+login_manager.init_app(app)
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -148,7 +149,7 @@ def new_task():
         return redirect('/')
     due = datetime.strptime(due, '%m/%d/%Y %I:%M %p')
     created = datetime.now()
-    itemid = md5.new(username + title + repr(created)).hexdigest()
+    itemid = md5.new(username.encode('utf8') + title.encode('utf8') + repr(created)).hexdigest()
     item = Item(username=username, itemid=itemid, title=title, due=due, description=description, created=created)
     db.session.add(item)
     flash('New item added.')
@@ -161,5 +162,4 @@ def date_fmt(date):
 if __name__ == '__main__':
     #db.drop_all()
     db.create_all()
-    login_manager.init_app(app)
     app.run('0.0.0.0', 5000, debug=True)
