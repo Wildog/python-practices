@@ -73,7 +73,7 @@ def index():
     else:
         count = Item.query.filter_by(username=current_user.username).count()
         pagination = Item.query.filter_by(username=current_user.username).order_by(order.asc()).paginate(page_num, per_page=5, error_out=True)
-    page = render_template('index.html', username=current_user.username, count=count, items=pagination.items, pagination=pagination, search=search)
+    page = render_template('index.html', username=current_user.username, count=count, items=pagination.items, pagination=pagination, search=search, csrf=session.get('csrf'))
 
     res = make_response(page)
     return res
@@ -81,6 +81,10 @@ def index():
 @app.route('/delete')
 @login_required
 def delete():
+    print request.args.get('csrf')
+    print session.get('csrf')
+    if request.args.get('csrf') != session.get('csrf'):
+        return 'Illegal operation.'
     itemid = request.args.get('id')
     if itemid is None:
         return 'Illegal operation.'
@@ -112,6 +116,7 @@ class LoginView(MethodView):
         user = User.query.filter(func.lower(User.username)==func.lower(username)).first()
         if user is not None and user.verify_password(password):
             login_user(user)
+            session['csrf'] = md5.new(os.urandom(24)).hexdigest()
             return redirect('/')
         else:
             flash('Wrong username or password!')
@@ -140,6 +145,9 @@ def register():
 @app.route('/newtask', methods=['POST'])
 @login_required
 def new_task():
+    print request.form.get('csrf')
+    if request.form.get('csrf') != session.get('csrf'):
+        return 'Illegal operation.'
     username = current_user.username
     title = request.form['title']
     description = request.form['description']
